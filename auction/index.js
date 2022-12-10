@@ -2,13 +2,9 @@ const express = require('express');
 require('./config/db');
 const app = express();
 const cookieParser = require('cookie-parser')
-const initRoute = require('./routes/initRoute');
-const multer = require('multer');
-const bodyParser = require('body-parser');
+const initRoute = require('./routes/initRoute.js');
 const path = require('path');
 
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
 const cors = require('cors');
 
 app.use(cors());
