@@ -8,4 +8,6 @@ router.use(auth);
 
 router.get("/current_auction", CheckIfUser, auctionController.getCurrentAuctions);
 
+router.get("/single_auction/:id", CheckIfUser, auctionController.getSingleAuction);
+
 module.exports = router; 
