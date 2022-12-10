@@ -19,7 +19,7 @@ const auth = async (req, res, next) => {
           error: "Please authenticate",
         });
       }
-      console.log(user, "User Info");
+      console.log("User Info");
       req.user = user;
       req.admin = false;
       return next();

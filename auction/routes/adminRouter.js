@@ -8,4 +8,6 @@ router.use(auth);
 
 router.post("/create_auction", checkIfAdmin, adminController.createAuction);
 
+router.get("/all_auctions", checkIfAdmin, adminController.getAllAuctions);
+
 module.exports = router;
