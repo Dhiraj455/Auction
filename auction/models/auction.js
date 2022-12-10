@@ -36,10 +36,17 @@ const AuctionSchema = new mongoose.Schema({
       },
       bid: {
         type: Number,
-        required: true,
       },
     },
   ],
+  winner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  AuctionLive: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const Auction = mongoose.model("Auction", AuctionSchema);
