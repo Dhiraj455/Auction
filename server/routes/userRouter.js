@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const CheckIfUser = require("../middlewares/RequiredUser").CheckIfUser;
+const checkIfAdmin = require("../middlewares/RequiredUser").checkIfAdmin;
 const auth = require("../middlewares/Authentication");
 const userControl = require("../controllers/userController");
 
@@ -16,5 +17,9 @@ router.get("/logout", (req, res) => {
 });
 
 router.get("/profile", CheckIfUser, userControl.getProfile);
+
+router.delete("/user_delete", checkIfAdmin, userControl.deleteUser);
+
+router.put("/user_update", CheckIfUser, userControl.updateUser);
 
 module.exports = router;

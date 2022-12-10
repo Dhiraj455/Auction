@@ -56,7 +56,6 @@ module.exports.login = async (req, res) => {
         res.cookie("token", token, {
           httpOnly: true,
           sameSite: "none",
-          signed: true,
           secure: true,
           expires: maxAge,
           maxAge: maxAge * 1000,
@@ -69,7 +68,6 @@ module.exports.login = async (req, res) => {
       const maxAge = 1000 * 60;
       console.log(token);
       res.cookie("token", token, {
-        signed: true,
         sameSite: "none",
         secure: true,
         expires: maxAge,
@@ -93,7 +91,8 @@ module.exports.updateUser = async (req, res) => {
     errMessage: "",
   };
   try {
-    const { name, description, email } = req.body;
+    const { name, description } = req.body;
+    const email = req.user.email;
     const user = await User.findOneAndUpdate(
       { email: email },
       {
@@ -129,11 +128,40 @@ module.exports.getProfile = async (req, res) => {
       response.success = true;
       res.status(200).json(response);
     });
-  }
-  catch(err) {
+  } catch (err) {
     console.log("Error", err);
     response.message = "Something went wrong!";
     response.errMessage = err.message;
     res.status(400).json(response);
   }
-}
+};
+
+module.exports.deleteUser = async (req, res) => {
+  let response = {
+    success: false,
+    message: "",
+    errMessage: "",
+  };
+  try {
+    const { email, user_id } = req.body;
+    const user = await User.findOne({ email: email });
+    if (user) {
+      await User.findOneAndDelete({
+        _id: user_id,
+      });
+      response.success = true;
+      response.message = "User deleted successfully";
+      res.status(200).json(response);
+    } else {
+      response.success = false;
+      response.message = "User not found";
+      res.status(200).json(response);
+    }
+  } catch (err) {
+    console.log("Error", err);
+    response.message = "Something went wrong!";
+    response.errMessage = err.message;
+    res.status(400).json(response);
+  }
+};
+
