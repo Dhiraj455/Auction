@@ -7,7 +7,6 @@ module.exports.createAuction = async (req, res) => {
     message: "",
     errMessage: "",
   };
-  console.log(req.body);
   try {
     const { name, description, startingPrice, endDate } = req.body;
     const end_date = new Date(endDate);
@@ -21,7 +20,6 @@ module.exports.createAuction = async (req, res) => {
         startingPrice,
         currentPrice: startingPrice,
         endDate,
-        startDate: new Date(),
       });
       await auction.save();
       response.success = true;

@@ -51,3 +51,37 @@ module.exports.getSingleAuction = async (req, res) => {
     res.status(400).json(response);
   }
 };
+
+module.exports.endAuction = async (req, res) => {
+  let response = {
+    success: false,
+    message: "",
+    errMessage: "",
+  };
+  try {
+    const { id } = req.params;
+    const auction = await Auction.findOne({
+      _id: id,
+      AuctionLive: true,
+      endDate: { $lt: new Date() },
+    });
+    if (auction) {
+      console.log(auction.endDate, new Date());
+      await Auction.updateOne(
+        { _id: id },
+        { $set: { AuctionLive: false, winner: auction.highestBidder } }
+      );
+      response.success = true;
+      response.message = "Auction ended successfully";
+      res.status(200).json(response);
+    } else {
+      response.message = "Auction not found or not ended yet";
+      res.status(400).json(response);
+    }
+  } catch (err) {
+    console.log("Error", err);
+    response.message = "Something went wrong!";
+    response.errMessage = err.message;
+    res.status(400).json(response);
+  }
+};
