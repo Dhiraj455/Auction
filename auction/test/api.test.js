@@ -12,6 +12,9 @@ var admin_cookie =
 
 var auction_id1 = "";
 var auction_id2 = "";
+var auction_id3 = "";
+var end_auction1 = "63961d401c298db83b526199";
+var end_auction2 = "63961d69970a47f88065a5bd";
 
 beforeAll(async () => {
   await mongoose.connect(process.env.DATABASE_URL2, {
@@ -35,7 +38,6 @@ async function dropAllCollections() {
 
 // Disconnect Mongoose
 afterAll(async () => {
-  await dropAllCollections();
   await mongoose.connection.close();
 });
 
@@ -51,6 +53,7 @@ describe("Post Create Auction /create_auction", () => {
           endDate: "2022-12-17",
         })
         .set("Cookie", [admin_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(200);
     });
     it("2nd Succesful Registration should return 200 OK", async () => {
@@ -63,6 +66,7 @@ describe("Post Create Auction /create_auction", () => {
           endDate: "2022-12-17",
         })
         .set("Cookie", [admin_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(200);
     });
     it("3rd Succesful Registration should return 200 OK", async () => {
@@ -75,6 +79,7 @@ describe("Post Create Auction /create_auction", () => {
           endDate: "2022-12-17",
         })
         .set("Cookie", [admin_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(200);
     });
     it("Create Auction With End Date Less Than Current Date should return 400 OK", async () => {
@@ -87,6 +92,7 @@ describe("Post Create Auction /create_auction", () => {
           endDate: "2021-12-11",
         })
         .set("Cookie", [admin_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(400);
     });
     it("Create Auction Without Authentication should return 401 OK", async () => {
@@ -96,6 +102,7 @@ describe("Post Create Auction /create_auction", () => {
         startingPrice: "300",
         endDate: "2021-12-17",
       });
+      console.log(res.body);
       expect(res.statusCode).toEqual(401);
     });
     it("Create Auction With User Authentication should return 401 OK", async () => {
@@ -108,6 +115,7 @@ describe("Post Create Auction /create_auction", () => {
           endDate: "2021-12-17",
         })
         .set("Cookie", [user_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(401);
     });
   });
@@ -120,7 +128,7 @@ describe("Get All Auction /all_auctions", () => {
         .get("/all_auctions")
         .set("Cookie", [admin_cookie]);
       expect(res.statusCode).toEqual(200);
-      console.log(res.body);
+      console.log("All Auctions: ", res.body.result);
     });
     it("User Get All Auctions should return 401 OK", async () => {
       const res = await request(app)
@@ -143,8 +151,10 @@ describe("Get Current Auction /current_auction", () => {
       const res = await request(app)
         .get("/current_auction")
         .set("Cookie", [user_cookie]);
+      console.log("Current Auctions : ", res.body.result);
       auction_id1 = res.body.result[0]._id;
       auction_id2 = res.body.result[1]._id;
+      auction_id3 = res.body.result[2]._id;
       expect(res.statusCode).toEqual(200);
     });
     it("Admin Get Current Auction should return 401 OK", async () => {
@@ -217,6 +227,7 @@ describe("Put Update Auction /update_auction/:id", () => {
           endDate: "2021-12-10",
         })
         .set("Cookie", [admin_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(400);
     });
     it("Update Auction Without Authentication should return 401 OK", async () => {
@@ -228,6 +239,7 @@ describe("Put Update Auction /update_auction/:id", () => {
           startingPrice: "400",
           endDate: "2021-12-17",
         });
+      console.log(res.body);
       expect(res.statusCode).toEqual(401);
     });
     it("Update Auction With User Authentication should return 401 OK", async () => {
@@ -240,6 +252,7 @@ describe("Put Update Auction /update_auction/:id", () => {
           endDate: "2021-12-17",
         })
         .set("Cookie", [user_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(401);
     });
   });
@@ -254,12 +267,14 @@ describe("Put Bid Auction /bid/:id", () => {
           bidAmount: "500",
         })
         .set("Cookie", [user_cookie]);
+      console.log("Bid Auction", res.body);
       expect(res.statusCode).toEqual(200);
     });
     it("Bid Auction Without Authentication should return 401 OK", async () => {
       const res = await request(app).put(`/bid/${auction_id1}`).send({
         bidAmount: "500",
       });
+      console.log(res.body);
       expect(res.statusCode).toEqual(401);
     });
     it("Bid Auction With Admin Authentication should return 401 OK", async () => {
@@ -269,6 +284,7 @@ describe("Put Bid Auction /bid/:id", () => {
           bidAmount: "500",
         })
         .set("Cookie", [admin_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(401);
     });
     it("Bid Auction With Bid Less Than Current Bid should return 400 OK", async () => {
@@ -278,6 +294,7 @@ describe("Put Bid Auction /bid/:id", () => {
           bidAmount: "400",
         })
         .set("Cookie", [user_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(400);
     });
   });
@@ -285,28 +302,127 @@ describe("Put Bid Auction /bid/:id", () => {
 
 describe("Delete Auction /delete_auction/:id", () => {
   describe("Only Admin Can Delete Auction", () => {
-    it("Succesful Delete Auction should return 200 OK", async () => {
+    it("1st Succesful Delete Auction should return 200 OK", async () => {
       const res = await request(app)
         .delete(`/delete_auction/${auction_id2}`)
         .set("Cookie", [admin_cookie]);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("2nd Succesful Delete Auction should return 200 OK", async () => {
+      const res = await request(app)
+        .delete(`/delete_auction/${auction_id1}`)
+        .set("Cookie", [admin_cookie]);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("3rd Succesful Delete Auction should return 200 OK", async () => {
+      const res = await request(app)
+        .delete(`/delete_auction/${auction_id3}`)
+        .set("Cookie", [admin_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(200);
     });
     it("Delete Auction Without Authentication should return 401 OK", async () => {
       const res = await request(app).delete(`/delete_auction/${auction_id1}`);
+      console.log(res.body);
       expect(res.statusCode).toEqual(401);
     });
     it("Delete Auction With User Authentication should return 401 OK", async () => {
       const res = await request(app)
         .delete(`/delete_auction/${auction_id1}`)
         .set("Cookie", [user_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(401);
     });
     it("Delete Auction That Doesn't Exist should return 400 OK", async () => {
       const res = await request(app)
         .delete(`/delete_auction/${auction_id2}`)
         .set("Cookie", [admin_cookie]);
+      console.log(res.body);
       expect(res.statusCode).toEqual(400);
     });
   });
 });
 
+describe("End Auction /end_auction/:id", () => {
+  describe("Doesn't Need To Be Authenticated", () => {
+    it("Get Auction Before End should return 200 OK", async () => {
+      const res = await request(app)
+        .get(`/single_auction/${end_auction1}`)
+        .set("Cookie", [user_cookie]);
+      console.log("Single Auction Before Ending", res.body.result);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("Succesful End Auction should return 200 OK", async () => {
+      const res = await request(app).put(`/end_auction/${end_auction1}`);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("Get Auction After End should return 200 OK", async () => {
+      const res = await request(app)
+        .get(`/single_auction/${end_auction1}`)
+        .set("Cookie", [user_cookie]);
+      console.log("Single Auction After Ending", res.body.result);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("End Auction That Doesn't Exist should return 400 OK", async () => {
+      const res = await request(app).put(`/end_auction/${auction_id2}`);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(400);
+    });
+    it("End Auction That Has Not Ended should return 400 OK", async () => {
+      const res = await request(app).put(`/end_auction/${auction_id3}`);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(400);
+    });
+    it("End Auction Which is Already Ended should return 400 OK", async () => {
+      const res = await request(app).put(`/end_auction/${end_auction1}`);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(400);
+    });
+    it("Get Auction Without Bids Before End should return 200 OK", async () => {
+      const res = await request(app)
+        .get(`/single_auction/${end_auction2}`)
+        .set("Cookie", [user_cookie]);
+      console.log("Single Auction Without Bids Before Ending", res.body.result);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("End Auction Which Has No Bid should return 400 OK", async () => {
+      const res = await request(app).put(`/end_auction/${end_auction2}`);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(400);
+    });
+    it("Get Auction After End should return 200 OK", async () => {
+      const res = await request(app)
+        .get(`/single_auction/${end_auction2}`)
+        .set("Cookie", [user_cookie]);
+      console.log("Single Auction Without Bids After Ending", res.body.result);
+      expect(res.statusCode).toEqual(200);
+    });
+  });
+});
+
+describe("Get Won Auction /won_auctions", () => {
+  describe("Only User Can Get Won Auctions", () => {
+    it("Get Won Auction should return 200 OK", async () => {
+      const res = await request(app)
+        .get(`/won_auctions`)
+        .set("Cookie", [user_cookie]);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("Get Won Auction Without Authentication should return 401 OK", async () => {
+      const res = await request(app).get(`/won_auctions`);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(401);
+    });
+    it("Get Won Auction With Admin Authentication should return 401 OK", async () => {
+      const res = await request(app)
+        .get(`/won_auctions`)
+        .set("Cookie", [admin_cookie]);
+      console.log(res.body);
+      expect(res.statusCode).toEqual(401);
+    });
+  });
+});

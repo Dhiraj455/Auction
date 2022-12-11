@@ -18,13 +18,11 @@ const auth = async (req, res, next) => {
           error: "Please authenticate",
         });
       }
-      console.log("User Info");
       req.user = user;
       req.admin = false;
       return next();
     }
     if (decoded.user.role === "admin") {
-      console.log("Admin");
       req.admin = true;
       return next();
     }

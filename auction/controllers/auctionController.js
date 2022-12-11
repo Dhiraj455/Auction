@@ -37,7 +37,7 @@ module.exports.getSingleAuction = async (req, res) => {
     const { id } = req.params;
     await Auction.findOne({ _id: id })
       .select(
-        "name description startingPrice currentPrice endDate startDate highestBidder"
+        "name description startingPrice currentPrice endDate startDate highestBidder AuctionLive"
       )
       .then((result) => {
         response.result = result;
@@ -66,7 +66,12 @@ module.exports.endAuction = async (req, res) => {
       endDate: { $lt: new Date() },
     });
     if (auction) {
-      console.log(auction.endDate, new Date());
+      if (auction.bids.length == 0 || auction.bids == []) {
+        await Auction.updateOne({ _id: id }, { $set: { AuctionLive: false } });
+        response.message = "Auction ended Without any bids/Winner";
+        response.errMessage = "No bids found for this auction";
+        return res.status(400).json(response);
+      }
       await Auction.updateOne(
         { _id: id },
         { $set: { AuctionLive: false, winner: auction.highestBidder } }

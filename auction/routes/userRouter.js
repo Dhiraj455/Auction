@@ -8,4 +8,6 @@ router.use(auth);
 
 router.put("/bid/:id", CheckIfUser, userController.bidAuction);
 
+router.get("/won_auctions", CheckIfUser, userController.getWonAuction);
+
 module.exports = router;
