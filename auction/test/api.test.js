@@ -162,8 +162,33 @@ describe("Get Current Auction /current_auction", () => {
   });
 });
 
+describe("Get A Single Auction /single_auction/:id", () => {
+  describe("Anyone Can Access It Just Has To be Authenticated", () => {
+    it("Succesful Get A Single Auction by User should return 200 OK", async () => {
+      const res = await request(app)
+        .get(`/single_auction/${auction_id1}`)
+        .set("Cookie", [user_cookie]);
+      console.log("Single Auction", res.body);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("Succesful Get A Single Auction by Admin should return 200 OK", async () => {
+      const res = await request(app)
+        .get(`/single_auction/${auction_id1}`)
+        .set("Cookie", [admin_cookie]);
+      console.log("Single Auction", res.body);
+      expect(res.statusCode).toEqual(200);
+    });
+  });
+});
+
 describe("Put Update Auction /update_auction/:id", () => {
   describe("Only Admin Can Update Auction", () => {
+    it("Before Updating Auctions", async () => {
+      const res = await request(app)
+        .get(`/single_auction/${auction_id1}`)
+        .set("Cookie", [user_cookie]);
+      console.log("Before Update", res.body);
+    });
     it("Succesful Update Auction should return 200 OK", async () => {
       const res = await request(app)
         .put(`/update_auction/${auction_id1}`)
@@ -175,6 +200,12 @@ describe("Put Update Auction /update_auction/:id", () => {
         })
         .set("Cookie", [admin_cookie]);
       expect(res.statusCode).toEqual(200);
+    });
+    it("After Updating Auctions", async () => {
+      const res = await request(app)
+        .get(`/single_auction/${auction_id1}`)
+        .set("Cookie", [user_cookie]);
+      console.log("After Update", res.body);
     });
     it("Update Auction With End Date Less Than Current Date should return 400 OK", async () => {
       const res = await request(app)
@@ -214,97 +245,68 @@ describe("Put Update Auction /update_auction/:id", () => {
   });
 });
 
-// describe("POST /register", () => {
-//     it("1st Succesful Registration should return 200 OK", async () => {
-//       const res = await request().post("http://localhost:8000/register").send({
-//         name: "Dhiraj",
-//         email: "test5@gmail.com",
-//         password: "Pass@123",
-//         cpassword: "Pass@123",
-//       });
-//       expect(res.statusCode).toEqual(200);
-//     });
-//     it("2nd Succesful Registration should return 200 OK", async () => {
-//       const res = await request().post("http://localhost:8000/register").send({
-//         name: "Gameon",
-//         email: "test1@gmail.com",
-//         password: "Pass@123",
-//         cpassword: "Pass@123",
-//       });
-//       expect(res.statusCode).toEqual(200);
-//     });
-//     it("3rd Succesful Registration should return 200 OK", async () => {
-//       const res = await request().post("http://localhost:8000/register").send({
-//         name: "Internship",
-//         email: "test2@gmail.com",
-//         password: "Pass@123",
-//         cpassword: "Pass@123",
-//       });
-//       expect(res.statusCode).toEqual(200);
-//     });
-//     it("Registration Using Admin Email should return 422 OK", async () => {
-//       const res = await request().post("http://localhost:8000/register").send({
-//         name: "Dhiraj",
-//         email: "admin@gmail.com",
-//         password: "Pass@123",
-//         cpassword: "Pass@123",
-//       });
-//       expect(res.statusCode).toEqual(422);
-//     });
-//     it("Fill All Details should return 422 OK", async () => {
-//       const res = await request().post("http://localhost:8000/register").send({
-//         name: "Dhiraj",
-//         email: "",
-//       });
-//       expect(res.statusCode).toEqual(422);
-//     });
-//     it("User Exist should return 422 OK", async () => {
-//       const res = await request().post("http://localhost:8000/register").send({
-//         name: "Dhiraj",
-//         email: "test5@gmail.com",
-//         password: "Pass@123",
-//         cpassword: "Pass@123",
-//       });
-//       expect(res.statusCode).toEqual(422);
-//     });
-//   });
+describe("Put Bid Auction /bid/:id", () => {
+  describe("Only User Can Bid", () => {
+    it("Succesful Bid Auction should return 200 OK", async () => {
+      const res = await request(app)
+        .put(`/bid/${auction_id1}`)
+        .send({
+          bidAmount: "500",
+        })
+        .set("Cookie", [user_cookie]);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("Bid Auction Without Authentication should return 401 OK", async () => {
+      const res = await request(app).put(`/bid/${auction_id1}`).send({
+        bidAmount: "500",
+      });
+      expect(res.statusCode).toEqual(401);
+    });
+    it("Bid Auction With Admin Authentication should return 401 OK", async () => {
+      const res = await request(app)
+        .put(`/bid/${auction_id1}`)
+        .send({
+          bidAmount: "500",
+        })
+        .set("Cookie", [admin_cookie]);
+      expect(res.statusCode).toEqual(401);
+    });
+    it("Bid Auction With Bid Less Than Current Bid should return 400 OK", async () => {
+      const res = await request(app)
+        .put(`/bid/${auction_id1}`)
+        .send({
+          bidAmount: "400",
+        })
+        .set("Cookie", [user_cookie]);
+      expect(res.statusCode).toEqual(400);
+    });
+  });
+});
 
-//   describe("POST /login", () => {
-//     it("Succesful User Login should return 200 OK", async () => {
-//       const res = await request().post("http://localhost:8000/login").send({
-//         email: "test5@gmail.com",
-//         password: "Pass@123",
-//       });
-//       user_cookie = res.headers["set-cookie"][0];
-//       expect(res.statusCode).toEqual(200);
-//     });
-//     it("Succesful Admin Login should return 200 OK", async () => {
-//       const res = await request().post("http://localhost:8000/login").send({
-//         email: "admin@gmail.com",
-//         password: "admin12345",
-//       });
-//       admin_cookie = res.headers["set-cookie"][0];
-//       expect(res.statusCode).toEqual(200);
-//     });
-//     it("Fill All Details should return 400 OK", async () => {
-//       const res = await request().post("http://localhost:8000/login").send({
-//         email: "",
-//         password: "Pass@123",
-//       });
-//       expect(res.statusCode).toEqual(400);
-//     });
-//     it("Invalid Credential Of User should return 400 OK", async () => {
-//       const res = await request().post("http://localhost:8000/login").send({
-//         email: "test5@gmail.com",
-//         password: "Pass@12",
-//       });
-//       expect(res.statusCode).toEqual(400);
-//     });
-//     it("Invalid Credential Of Admin should return 400 OK", async () => {
-//       const res = await request().post("http://localhost:8000/login").send({
-//         email: "admin@gmail.com",
-//         password: "admin123",
-//       });
-//       expect(res.statusCode).toEqual(400);
-//     });
-//   });
+describe("Delete Auction /delete_auction/:id", () => {
+  describe("Only Admin Can Delete Auction", () => {
+    it("Succesful Delete Auction should return 200 OK", async () => {
+      const res = await request(app)
+        .delete(`/delete_auction/${auction_id2}`)
+        .set("Cookie", [admin_cookie]);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("Delete Auction Without Authentication should return 401 OK", async () => {
+      const res = await request(app).delete(`/delete_auction/${auction_id1}`);
+      expect(res.statusCode).toEqual(401);
+    });
+    it("Delete Auction With User Authentication should return 401 OK", async () => {
+      const res = await request(app)
+        .delete(`/delete_auction/${auction_id1}`)
+        .set("Cookie", [user_cookie]);
+      expect(res.statusCode).toEqual(401);
+    });
+    it("Delete Auction That Doesn't Exist should return 400 OK", async () => {
+      const res = await request(app)
+        .delete(`/delete_auction/${auction_id2}`)
+        .set("Cookie", [admin_cookie]);
+      expect(res.statusCode).toEqual(400);
+    });
+  });
+});
+
