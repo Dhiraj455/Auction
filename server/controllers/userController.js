@@ -21,7 +21,7 @@ module.exports.register = async (req, res) => {
     try {
       const user = await User.findOne({ email: email });
       if (user) {
-        return res.json({ message: "User already exists" }).status(200);
+        return res.status(422).json({ message: "User already exists" });
       }
       const newUser = new User({
         name,
@@ -52,7 +52,6 @@ module.exports.login = async (req, res) => {
       if (email == Admin_email && password == Admin_password) {
         token = generateToken({ id: Admin_id, role: "admin" });
         const maxAge = 1000 * 60;
-        console.log(token);
         res.cookie("token", token, {
           httpOnly: true,
           sameSite: "none",
@@ -60,13 +59,14 @@ module.exports.login = async (req, res) => {
           expires: maxAge,
           maxAge: maxAge * 1000,
         });
-        res.json({ message: "Admin Login Successful" });
+        res.status(200).json({ message: "Admin Login Successful" });
+      } else {
+        return res.status(400).json({ message: "Invalid Credentials" });
       }
     } else {
       const isMatch = await bcrypt.compare(password, user.password);
       token = await user.generateAuthToken({ id: user._id, role: "user" });
       const maxAge = 1000 * 60;
-      console.log(token);
       res.cookie("token", token, {
         sameSite: "none",
         secure: true,
@@ -76,7 +76,7 @@ module.exports.login = async (req, res) => {
       if (!isMatch) {
         return res.status(400).json({ message: "Invalid Credentials" });
       } else {
-        res.json({ message: "Login Successful" });
+        res.status(200).json({ message: "Login Successful" });
       }
     }
   } catch (err) {
@@ -135,33 +135,3 @@ module.exports.getProfile = async (req, res) => {
     res.status(400).json(response);
   }
 };
-
-module.exports.deleteUser = async (req, res) => {
-  let response = {
-    success: false,
-    message: "",
-    errMessage: "",
-  };
-  try {
-    const { email, user_id } = req.body;
-    const user = await User.findOne({ email: email });
-    if (user) {
-      await User.findOneAndDelete({
-        _id: user_id,
-      });
-      response.success = true;
-      response.message = "User deleted successfully";
-      res.status(200).json(response);
-    } else {
-      response.success = false;
-      response.message = "User not found";
-      res.status(200).json(response);
-    }
-  } catch (err) {
-    console.log("Error", err);
-    response.message = "Something went wrong!";
-    response.errMessage = err.message;
-    res.status(400).json(response);
-  }
-};
-

@@ -5,7 +5,6 @@ const User = require("../models/user");
 const auth = async (req, res, next) => {
   try {
     const token = req.cookies.token;
-    console.log(req.cookies);
     if (!token) {
       return res.status(401).json({
         error: "Please authenticate",
@@ -19,13 +18,11 @@ const auth = async (req, res, next) => {
           error: "Please authenticate",
         });
       }
-      console.log(user, "User Info");
       req.user = user;
       req.admin = false;
       return next();
     }
     if (decoded.user.role === "admin") {
-      console.log("Admin");
       req.admin = true;
       return next();
     }

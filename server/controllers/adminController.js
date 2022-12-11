@@ -35,11 +35,11 @@ module.exports.deleteUser = async (req, res) => {
     errMessage: "",
   };
   try {
-    const { email, user_id } = req.body;
+    const { email } = req.body;
     const user = await User.findOne({ email: email });
     if (user) {
       await User.findOneAndDelete({
-        _id: user_id,
+        _id: user._id,
       });
       response.success = true;
       response.message = "User deleted successfully";
@@ -47,7 +47,7 @@ module.exports.deleteUser = async (req, res) => {
     } else {
       response.success = false;
       response.message = "User not found";
-      res.status(200).json(response);
+      res.status(400).json(response);
     }
   } catch (err) {
     console.log("Error", err);
