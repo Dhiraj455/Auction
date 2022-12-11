@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const dotenv = require('dotenv');
 dotenv.config();
 
-app.get("/", (req, res) => {res.send("Hello World User Management Micro Service")});
+app.get("/", (req, res) => {res.send("Hello World Auction Bidding Micro Service")});
 
 app.use(express.json());
 

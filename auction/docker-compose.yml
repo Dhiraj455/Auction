@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  server:
+    image: auction
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env
+    ports:
+      - 8001:8001

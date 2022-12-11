@@ -32,7 +32,7 @@ async function dropAllCollections() {
 
 // Disconnect Mongoose
 afterAll(async () => {
-  await dropAllCollections();
+  // await dropAllCollections();
   await mongoose.connection.close();
 });
 
@@ -40,7 +40,7 @@ describe("POST /register", () => {
   it("1st Succesful Registration should return 200 OK", async () => {
     const res = await request(app).post("/register").send({
       name: "Dhiraj",
-      email: "test5@gmail.com",
+      email: "test10@gmail.com",
       password: "Pass@123",
       cpassword: "Pass@123",
     });
@@ -182,10 +182,18 @@ describe("Delete User /user_delete", () => {
       const res = await request(app)
         .delete("/user_delete")
         .send({
-          email: "test@gmail.com"
+          email: "test@gmail.com",
         })
         .set("Cookie", [admin_cookie]);
       expect(res.statusCode).toEqual(400);
+      console.log(res.body);
+    });
+    it("User Accessing Delete Users should return 401 OK", async () => {
+      const res = await request(app)
+        .delete("/user_delete")
+        .send({ email: "test5@gmail.com" })
+        .set("Cookie", [user_cookie]);
+      expect(res.statusCode).toEqual(401);
       console.log(res.body);
     });
     it("Without Authentication Delete User should return 401 OK", async () => {
@@ -199,8 +207,15 @@ describe("Delete User /user_delete", () => {
 describe("GET All Users /users", () => {
   describe("Only Admin Can Get All Users", () => {
     it("Succesful Get Users should return 200 OK", async () => {
-      const res = await request(app).get("/users").set("Cookie", [admin_cookie]);
+      const res = await request(app)
+        .get("/users")
+        .set("Cookie", [admin_cookie]);
       expect(res.statusCode).toEqual(200);
+      console.log(res.body);
+    });
+    it("User Get Users should return 401 OK", async () => {
+      const res = await request(app).get("/users").set("Cookie", [user_cookie]);
+      expect(res.statusCode).toEqual(401);
       console.log(res.body);
     });
     it("Without Authentication Get Users should return 401 OK", async () => {
